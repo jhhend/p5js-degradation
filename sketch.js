@@ -76,6 +76,13 @@ function generateLines(grid) {
 
   const connectAdjacent = (h, w) => {
 
+    const offsets = [
+      { x: -1, y: 0 },
+      { x: 1, y: 0 },
+      { x: 0, y: -1 },
+      { x: 0, y: 1 }
+    ];
+
     let diagOffsets = [
       { x: -1, y: -1 },
       { x: -1, y: 1 },
@@ -83,11 +90,11 @@ function generateLines(grid) {
       { x: 1, y: 1 }
     ];
 
-    const xOff = [ 0, 0, -1, 1 ];
-    const yOff = [ -1, 1, 0, 0 ];
-    for (let i = 0; i < 4; i++) {
-      let x = w + xOff[i];
-      let y = h + yOff[i];
+    for (let offset of offsets) {
+      let xOff = offset.x;
+      let yOff = offset.y;
+      let x = w + xOff
+      let y = h + yOff
       if (y < 0 || y >= HEIGHT) { continue; } // Bounds check
 
       // Add a connection
@@ -95,21 +102,25 @@ function generateLines(grid) {
         let key = `${w},${h},${x},${y}`;
         if (lines[key] === undefined) { 
           lines[key] = true;
-        }
-        // Remove the diagOffsets which are adjacent to the current position
-        if ((xOff[i] === 0 && yOff[i] === -1) || (xOff[i] === 0 && yOff[i] === 1)) {
+          // Remove the diagOffsets which are adjacent to the current position
           diagOffsets = diagOffsets.filter(v => {
-            if (v.x === -1 && v.y === -1) { return false; }
-            if (v.x === -1 && v.y === 1) { return false; }
+            console.log(xOff, yOff, v);
+            if (xOff !== 0) {
+              if (v.x === xOff && v.y === yOff - 1) { return false; }
+              if (v.x === xOff && v.y === yOff + 1) { return false; }
+            } else if (yOff !== 0) {
+              if (v.x === xOff - 1 && v.y === yOff) { return false; }
+              if (v.x === xOff + 1 && v.y === yOff) { return false; }
+            }
+            return true; 
           });
-        } else if ((xOff[i] === -1 && yOff[i] === 0) || (xOff[i] === 1 && yOff[i] === 0)) {
-          diagOffsets = diagOffsets.filter(v => {
-            if (v.x === -1 && v.y === -1) { return false; }
-            if (v.x === 1 && v.y === -1) { return false; }
-          });
+          console.log(diagOffsets);
         }
+
       }
     }
+
+    console.log(diagOffsets);
 
     if (diagOffsets.length === 0) { return; }
 
