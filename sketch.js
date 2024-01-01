@@ -35,15 +35,13 @@ function draw() {
     }
   }
 
-  for (let key in lines) {
-    let [x, y, x2, y2] = key.split(',').map(v => parseInt(v));
-    let x1 = x*cellWidth + cellWidth/2;
-    let y1 = y*cellHeight + cellHeight/2;
-    let x3 = x2*cellWidth + cellWidth/2;
-    let y3 = y2*cellHeight + cellHeight/2;
-    line(x1, y1, x3, y3);
+  for (const l of lines) {
+    let x1 = l.x*cellWidth + cellWidth/2;
+    let y1 = l.y*cellHeight + cellHeight/2;
+    let x2 = l.x2*cellWidth + cellWidth/2;
+    let y2 = l.y2*cellHeight + cellHeight/2;
+    line(x1, y1, x2, y2);
   }
-
 }
 
 
@@ -104,7 +102,6 @@ function generateLines(grid) {
           lines[key] = true;
           // Remove the diagOffsets which are adjacent to the current position
           diagOffsets = diagOffsets.filter(v => {
-            console.log(xOff, yOff, v);
             if (xOff !== 0) {
               if (v.x === xOff && v.y === yOff - 1) { return false; }
               if (v.x === xOff && v.y === yOff + 1) { return false; }
@@ -114,7 +111,6 @@ function generateLines(grid) {
             }
             return true; 
           });
-          console.log(diagOffsets);
         }
 
       }
@@ -144,10 +140,13 @@ function generateLines(grid) {
   for (let h = 0; h < HEIGHT; h++) {
     for (let w = 0; w < WIDTH; w++) {
       if (!grid[h][w]) { continue; } // Only generate lines for filled cells
-
       connectAdjacent(h, w);
     }
   }
-
-  return lines;
+  
+  // Flatten to array of objects
+  return Object.keys(lines).map(v => {
+    let [x, y, x2, y2] = v.split(',').map(v => parseInt(v));
+    return { x, y, x2, y2 };
+  });
 }
