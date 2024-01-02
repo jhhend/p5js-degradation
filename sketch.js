@@ -1,9 +1,13 @@
 
 const WIDTH = 29;
-const HEIGHT = 12;
+const HEIGHT = 29//14;
 const CANVAS_SIZE = 720;
+const CELL_WIDTH = 23;
+const CELL_HEIGHT = 21;
+const RADIUS = CELL_HEIGHT/2;
 const grid = generateGrid();
 const lines = generateLines(grid);
+
 
 // p5.js Functions
 function setup() {
@@ -16,31 +20,22 @@ function setup() {
 
 
 function draw() {
-  let cellWidth = 23;
-  let cellHeight = 21;
-
   for (let h = 0; h < HEIGHT; h++) {
     for (let w = 0; w < WIDTH; w++) {
-      let x = w*cellWidth;
-      let y = h*cellHeight;
+      let x = w*CELL_WIDTH;
+      let y = h*CELL_HEIGHT;
       let v = grid[h][w];
-      
-      fill(255)
-      rect(x, y, cellWidth, cellHeight);
 
-      if (v) {
-        fill(0);
-        ellipse(x + cellWidth/2, y + cellHeight/2, 5, 5);
-      }
+      if (!v) { continue; }
+
+      strokeWeight(1);
+      fill(255);
+      ellipse(x + CELL_WIDTH/2, y + CELL_HEIGHT/2, RADIUS, RADIUS);
     }
   }
 
   for (const l of lines) {
-    let x1 = l.x*cellWidth + cellWidth/2;
-    let y1 = l.y*cellHeight + cellHeight/2;
-    let x2 = l.x2*cellWidth + cellWidth/2;
-    let y2 = l.y2*cellHeight + cellHeight/2;
-    line(x1, y1, x2, y2);
+    drawLine(l);
   }
 }
 
@@ -59,8 +54,12 @@ function mousePressed() {
 
 // Helper functions
 function generateGrid() {
-  const rowProbabilities = [ WIDTH, WIDTH, 20, 13, 11, 8, 8, 8, 6, 3, 3, 1 ].map(v => v / WIDTH);
-
+  //const rowProbabilities = [ WIDTH, WIDTH, WIDTH, WIDTH, 20, 13, 11, 8, 8, 8, 6, 3, 3, 1 ].map(v => v / WIDTH);
+  const rowProbabilities = new Array(HEIGHT).fill(0).map((v, idx) => {
+    if (idx < 4) { return WIDTH; }
+    return (WIDTH - idx) / WIDTH;
+  })
+  
   // Genreate the grid
   const grid = [ ];
   for (let i = 0; i < HEIGHT; i++) {
@@ -98,7 +97,8 @@ function generateLines(grid) {
       // Add a connection
       if (grid[y][x]) {
         let key = `${w},${h},${x},${y}`;
-        if (lines[key] === undefined) { 
+        let key2 = `${x},${y},${w},${h}`;
+        if (lines[key] === undefined || lines[key2] === undefined) { 
           lines[key] = true;
           // Remove the diagOffsets which are adjacent to the current position
           diagOffsets = diagOffsets.filter(v => {
@@ -116,8 +116,6 @@ function generateLines(grid) {
       }
     }
 
-    console.log(diagOffsets);
-
     if (diagOffsets.length === 0) { return; }
 
     // Connect diagonals, if they exist
@@ -128,7 +126,8 @@ function generateLines(grid) {
 
       // Add a connection
       let key = `${w},${h},${x},${y}`;
-      if (grid[y][x] && lines[key] === undefined) {
+      let key2 = `${x},${y},${w},${h}`;
+      if (grid[y][x] && lines[key] === undefined && lines[key2] === undefined) {
         lines[key] = true;
       }
 
@@ -149,4 +148,13 @@ function generateLines(grid) {
     let [x, y, x2, y2] = v.split(',').map(v => parseInt(v));
     return { x, y, x2, y2 };
   });
+}
+
+function drawLine(l) {
+  let angle = Math.atan2(l.y2 - l.y, l.x2 - l.x);
+  let x1 = l.x*CELL_WIDTH + CELL_WIDTH/2 + Math.cos(angle)*(RADIUS/2);
+  let y1 = l.y*CELL_HEIGHT + CELL_HEIGHT/2 + Math.sin(angle)*(RADIUS/2);
+  let x2 = l.x2*CELL_WIDTH + CELL_WIDTH/2 - Math.cos(angle)*(RADIUS/2);
+  let y2 = l.y2*CELL_HEIGHT + CELL_HEIGHT/2 - Math.sin(angle)*(RADIUS/2);
+  line(x1, y1, x2, y2);
 }
