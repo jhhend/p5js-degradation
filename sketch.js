@@ -138,14 +138,16 @@ function generateLines(grid) {
   const lines = { };
   for (let h = 0; h < HEIGHT; h++) {
     for (let w = 0; w < WIDTH; w++) {
-      if (!grid[h][w]) { continue; } // Only generate lines for filled cells
+       // Only generate lines for filled cells
+      if (!grid[h][w]) { continue; }
+
       connectAdjacent(h, w);
     }
   }
   
   // Flatten to array of objects
   return Object.keys(lines).map(v => {
-    let [x, y, x2, y2] = v.split(',').map(v => parseInt(v));
+    let [ x, y, x2, y2 ] = v.split(',').map(v => parseInt(v));
     return { x, y, x2, y2 };
   });
 }
