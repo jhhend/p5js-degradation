@@ -1,6 +1,6 @@
 # p5js-degradation
 
-New idea
+A nodes and lines artwork which starts off as a lattice, but becomes more and more disorderly. My second sketch made specifically for the AxiDraw.
 
 # Technologies Utilized
 
